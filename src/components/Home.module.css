@@ -28,6 +28,15 @@
   margin: 0;
 }
 
+.code {
+  display: inline-block;
+  font-family: var(--font-mono);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 var(--space-1);
+}
+
 .feed {
   display: flex;
   flex-direction: column;

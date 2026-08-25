@@ -98,8 +98,13 @@ export function Settings() {
           <span>Retention giorni</span>
           <input
             type="number"
+            min="1"
             value={settings.retentionDays}
-            onChange={e => update('retentionDays', Number(e.target.value))}
+            onChange={e => {
+              const parsed = Number(e.target.value)
+              if (!Number.isFinite(parsed) || parsed < 1) return
+              update('retentionDays', parsed)
+            }}
           />
         </label>
 

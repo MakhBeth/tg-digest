@@ -35,9 +35,14 @@ export function Onboarding() {
   const handlePhone = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
+    const parsedApiId = Number(apiId)
+    if (!Number.isFinite(parsedApiId) || parsedApiId <= 0) {
+      setError('api_id non valido')
+      return
+    }
     setBusy(true)
     try {
-      await telegramService.startLogin(Number(apiId), apiHash, phone)
+      await telegramService.startLogin(parsedApiId, apiHash, phone)
       setStep('code')
     } catch (err) {
       setError(errorMessage(err))

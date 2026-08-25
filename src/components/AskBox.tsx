@@ -23,6 +23,10 @@ export function AskBox() {
     setBusy(true); setError('')
     try {
       const ids = groupId === 'all' ? (groups ?? []).map(g => g.id) : [groupId]
+      if (ids.length === 0) {
+        setError('Non segui ancora nessun gruppo')
+        return
+      }
       const now = Date.now()
       await askQuestion({ groupIds: ids, from: now - periodMs, to: now, question: question.trim() })
       setQuestion('')
