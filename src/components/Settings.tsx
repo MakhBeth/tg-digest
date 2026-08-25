@@ -1,0 +1,119 @@
+import { useEffect, useState } from 'react'
+import { useApp } from '../context/AppContext'
+import { telegramService } from '../lib/telegram/service'
+import { getSettings, setSetting, DEFAULT_SETTINGS } from '../lib/db/settings'
+import type { AppSettings, LlmProvider } from '../types/models'
+import styles from './Settings.module.css'
+
+export function Settings() {
+  const { setView } = useApp()
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
+  const [loaded, setLoaded] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    getSettings().then(s => {
+      setSettings(s)
+      setLoaded(true)
+    })
+  }, [])
+
+  const update = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
+    setSettings(prev => ({ ...prev, [key]: value }))
+    void setSetting(key, String(value))
+  }
+
+  const logout = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      await telegramService.logout()
+      setView('onboarding')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!loaded) return null
+
+  return (
+    <div className={styles.wrapper}>
+      <h1 className={styles.title}>Impostazioni</h1>
+
+      <div className={styles.form}>
+        <label className={styles.field}>
+          <span>Provider</span>
+          <select
+            value={settings.provider}
+            onChange={e => update('provider', e.target.value as LlmProvider)}
+          >
+            <option value="ollama">Ollama</option>
+            <option value="anthropic">Anthropic</option>
+          </select>
+        </label>
+
+        <label className={styles.field}>
+          <span>Modello</span>
+          <input
+            type="text"
+            value={settings.model}
+            onChange={e => update('model', e.target.value)}
+          />
+        </label>
+
+        {settings.provider === 'anthropic' && (
+          <label className={styles.field}>
+            <span>API key Anthropic</span>
+            <input
+              type="password"
+              value={settings.anthropicKey}
+              onChange={e => update('anthropicKey', e.target.value)}
+            />
+          </label>
+        )}
+
+        {settings.provider === 'ollama' && (
+          <label className={styles.field}>
+            <span>URL Ollama</span>
+            <input
+              type="text"
+              value={settings.ollamaUrl}
+              onChange={e => update('ollamaUrl', e.target.value)}
+            />
+            <span className={styles.hint}>Avvia Ollama con OLLAMA_ORIGINS=* ollama serve</span>
+          </label>
+        )}
+
+        <label className={styles.field}>
+          <span>Profilo</span>
+          <textarea
+            value={settings.profile}
+            onChange={e => update('profile', e.target.value)}
+            placeholder="UX engineer che vuole prodottizzare servizi..."
+            rows={3}
+          />
+        </label>
+
+        <label className={styles.field}>
+          <span>Retention giorni</span>
+          <input
+            type="number"
+            value={settings.retentionDays}
+            onChange={e => update('retentionDays', Number(e.target.value))}
+          />
+        </label>
+
+        <button type="button" onClick={() => setView('home')}>
+          Torna alla home
+        </button>
+      </div>
+
+      <div className={styles.form} {...(busy ? { inert: true } : {})}>
+        <h2>Account</h2>
+        <button type="button" onClick={logout}>
+          {busy ? 'Disconnessione...' : 'Logout'}
+        </button>
+      </div>
+    </div>
+  )
+}

@@ -3,6 +3,7 @@ import { db } from '../lib/db/db'
 import { useOpenDigest } from '../hooks/useOpenDigest'
 import { useApp } from '../context/AppContext'
 import { SummaryCard } from './SummaryCard'
+import { AskBox } from './AskBox'
 import styles from './Home.module.css'
 
 export function Home() {
@@ -21,7 +22,7 @@ export function Home() {
       {phase === 'syncing' && <p className={styles.status}>Sync dei gruppi in corso...</p>}
       {phase === 'digesting' && <p className={styles.status}>Genero il digest...</p>}
       {phase === 'error' && <p className={styles.error}>{error}</p>}
-      {/* AskBox arriva nel Task 8 */}
+      <AskBox />
       <div className={styles.feed}>
         {(summaries ?? []).map(s => <SummaryCard key={s.id} summary={s} groupTitle={titleOf(s.groupId)} />)}
       </div>
