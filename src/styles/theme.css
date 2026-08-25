@@ -1,0 +1,22 @@
+:root {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --surface-2: #1f232d;
+  --border: #2a2f3a;
+  --text: #e8eaf0;
+  --text-dim: #9aa1b0;
+  --accent: #6ea8fe;
+  --danger: #ff6b6b;
+  --radius: 10px;
+  --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-4: 24px; --space-5: 40px;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+[data-theme='light'] {
+  --bg: #f6f7f9; --surface: #ffffff; --surface-2: #eef0f4;
+  --border: #d8dce3; --text: #1a1d24; --text-dim: #5c6470;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); }
+button { font: inherit; cursor: pointer; }
+input, textarea, select { font: inherit; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--space-2) var(--space-3); }
