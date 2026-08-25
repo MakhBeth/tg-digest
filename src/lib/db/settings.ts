@@ -22,10 +22,14 @@ export async function setSetting(key: SettingKey, value: string): Promise<void> 
 
 export async function getSettings(): Promise<AppSettings> {
   const rows = await db.settings.toArray()
-  const map = Object.fromEntries(rows.map(r => [r.key, r.value]))
+  const map = new Map(rows.map(r => [r.key, r.value]))
+  const provider = map.get('provider')
   return {
-    ...DEFAULT_SETTINGS,
-    ...map,
-    retentionDays: map.retentionDays ? Number(map.retentionDays) : DEFAULT_SETTINGS.retentionDays,
-  } as AppSettings
+    provider: provider === 'anthropic' ? 'anthropic' : DEFAULT_SETTINGS.provider,
+    model: map.get('model') ?? DEFAULT_SETTINGS.model,
+    anthropicKey: map.get('anthropicKey') ?? DEFAULT_SETTINGS.anthropicKey,
+    ollamaUrl: map.get('ollamaUrl') ?? DEFAULT_SETTINGS.ollamaUrl,
+    profile: map.get('profile') ?? DEFAULT_SETTINGS.profile,
+    retentionDays: Number(map.get('retentionDays') ?? DEFAULT_SETTINGS.retentionDays) || DEFAULT_SETTINGS.retentionDays,
+  }
 }
