@@ -1,5 +1,6 @@
 import { AppProvider, useApp } from './context/AppContext'
 import { Onboarding } from './components/Onboarding'
+import { Home } from './components/Home'
 import styles from './App.module.css'
 
 function AppShell() {
@@ -17,7 +18,7 @@ function AppShell() {
     case 'onboarding':
       return <Onboarding />
     case 'home':
-      return <p className={styles.app}>home</p>
+      return <Home />
     case 'settings':
       return <p className={styles.app}>impostazioni</p>
   }

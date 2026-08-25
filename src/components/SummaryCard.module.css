@@ -1,0 +1,64 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--accent);
+}
+
+.group {
+  font-weight: 600;
+}
+
+.period {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  margin-left: auto;
+}
+
+.question {
+  margin: 0;
+}
+
+.text {
+  line-height: 1.5;
+}
+
+.text :global(p:first-child) {
+  margin-top: 0;
+}
+
+.text :global(p:last-child) {
+  margin-bottom: 0;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--text-dim);
+  font-size: 0.8em;
+  font-family: var(--font-mono);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+}
