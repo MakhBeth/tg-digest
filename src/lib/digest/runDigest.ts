@@ -44,6 +44,6 @@ export async function askQuestion(args: { groupIds: string[]; from: number; to: 
     periodFrom: args.from, periodTo: args.to,
     text, model: `${settings.provider}/${settings.model}`, createdAt: Date.now(),
   }
-  summary.id = await db.summaries.add(summary) as number
+  summary.id = await db.summaries.add(summary)
   return summary
 }
