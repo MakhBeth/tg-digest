@@ -9,7 +9,7 @@ import styles from './Home.module.css'
 const OLLAMA_UNREACHABLE_CMD = 'OLLAMA_ORIGINS=* ollama serve'
 
 export function Home() {
-  const { phase, error, provider } = useOpenDigest()
+  const { phase, error, provider, syncWarning } = useOpenDigest()
   const { setView } = useApp()
   const summaries = useLiveQuery(() => db.summaries.orderBy('createdAt').reverse().limit(50).toArray(), [], [])
   const groups = useLiveQuery(() => db.groups.toArray(), [], [])
@@ -30,6 +30,7 @@ export function Home() {
         </p>
       )}
       {phase === 'error' && !isOllamaUnreachable && <p className={styles.error}>{error}</p>}
+      {syncWarning && <p className={styles.syncWarning}>{syncWarning}</p>}
       <AskBox />
       <div className={styles.feed}>
         {(summaries ?? []).map(s => <SummaryCard key={s.id} summary={s} groupTitle={titleOf(s.groupId)} />)}

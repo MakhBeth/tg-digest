@@ -28,6 +28,11 @@
   margin: 0;
 }
 
+.syncWarning {
+  color: var(--text-dim);
+  margin: 0;
+}
+
 .code {
   display: inline-block;
   font-family: var(--font-mono);

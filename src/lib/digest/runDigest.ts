@@ -13,8 +13,8 @@ export async function runOpenDigest(now: number): Promise<void> {
     const from = g.lastDigestAt || now - 7 * 86_400_000
     const msgs = await selectMessagesForPeriod([g.id], from, now)
     if (msgs.length === 0) continue
-    const { msgs: kept } = truncateToBudget(msgs, CONTEXT_CHAR_BUDGET)
-    const prompt = buildDigestPrompt({ groupTitle: g.title, formatted: formatMessages(kept), profile: settings.profile })
+    const { msgs: kept, truncated } = truncateToBudget(msgs, CONTEXT_CHAR_BUDGET)
+    const prompt = buildDigestPrompt({ groupTitle: g.title, formatted: formatMessages(kept), profile: settings.profile, truncated })
     try {
       const text = await chatCompletion(settings, prompt.system, prompt.user)
       await db.summaries.add({
@@ -23,9 +23,13 @@ export async function runOpenDigest(now: number): Promise<void> {
       })
       await db.groups.update(g.id, { lastDigestAt: now })
     } catch (e) {
+      const isOllamaUnreachable = settings.provider === 'ollama' && /fetch/i.test(String(e))
+      const text = isOllamaUnreachable
+        ? `**Errore digest**: Ollama non raggiungibile. Avvialo con: OLLAMA_ORIGINS=* ollama serve\n${String(e)}`
+        : `**Errore digest**: ${String(e)}`
       await db.summaries.add({
         groupId: g.id, type: 'digest', periodFrom: from, periodTo: now,
-        text: `**Errore digest**: ${String(e)}`, model: `${settings.provider}/${settings.model}`, createdAt: now,
+        text, model: `${settings.provider}/${settings.model}`, createdAt: now,
       })
       // lastDigestAt NON si aggiorna: al prossimo giro si riprova sullo stesso periodo
     }

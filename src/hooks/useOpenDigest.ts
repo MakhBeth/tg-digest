@@ -9,10 +9,11 @@ import type { LlmProvider } from '../types/models'
 
 export type DigestPhase = 'idle' | 'syncing' | 'digesting' | 'done' | 'error'
 
-export function useOpenDigest(): { phase: DigestPhase; error: string; provider: LlmProvider } {
+export function useOpenDigest(): { phase: DigestPhase; error: string; provider: LlmProvider; syncWarning: string } {
   const [phase, setPhase] = useState<DigestPhase>('idle')
   const [error, setError] = useState('')
   const [provider, setProvider] = useState<LlmProvider>('ollama')
+  const [syncWarning, setSyncWarning] = useState('')
   const ran = useRef(false)
   const { setView } = useApp()
 
@@ -25,7 +26,10 @@ export function useOpenDigest(): { phase: DigestPhase; error: string; provider: 
         setProvider(s.provider)
         await pruneOldMessages(Date.now(), s.retentionDays)
         setPhase('syncing')
-        await syncFollowedGroups()
+        const failedGroups = await syncFollowedGroups()
+        if (failedGroups.length > 0) {
+          setSyncWarning(`Sync fallito per: ${failedGroups.map(g => g.title).join(', ')}`)
+        }
         setPhase('digesting')
         await runOpenDigest(Date.now())
         setPhase('done')
@@ -37,5 +41,5 @@ export function useOpenDigest(): { phase: DigestPhase; error: string; provider: 
     })()
   }, [setView])
 
-  return { phase, error, provider }
+  return { phase, error, provider, syncWarning }
 }

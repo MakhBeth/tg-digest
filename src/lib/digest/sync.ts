@@ -1,7 +1,7 @@
 import { db } from '../db/db'
 import { telegramService, TelegramAuthError } from '../telegram/service'
 
-export async function syncFollowedGroups(): Promise<void> {
+export async function syncFollowedGroups(): Promise<Array<{ id: string; title: string }>> {
   const groups = await db.groups.filter(g => g.followed).toArray()
   const failedGroups: Array<{ id: string; title: string }> = []
 
@@ -20,8 +20,5 @@ export async function syncFollowedGroups(): Promise<void> {
     }
   }
 
-  if (failedGroups.length > 0) {
-    const failedList = failedGroups.map(fg => `${fg.title} (${fg.id})`).join(', ')
-    throw new Error(`Sync failed for groups: ${failedList}`)
-  }
+  return failedGroups
 }

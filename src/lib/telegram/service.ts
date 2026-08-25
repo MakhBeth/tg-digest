@@ -7,10 +7,13 @@ export class TelegramAuthError extends Error {}
 
 const AUTH_ERRORS = ['AUTH_KEY_UNREGISTERED', 'SESSION_REVOKED', 'USER_DEACTIVATED']
 
+const BACKFILL_HARD_CAP = 3000
+
 class TelegramService {
   private client: TelegramClient | null = null
   private pendingPhone = ''
   private phoneCodeHash = ''
+  private entityCacheWarmed = false
 
   private async getClient(): Promise<TelegramClient> {
     if (this.client?.connected) return this.client
@@ -19,7 +22,14 @@ class TelegramService {
     this.client = new TelegramClient(new StringSession(loadSession()), creds.apiId, creds.apiHash, {
       connectionRetries: 3,
     })
+    this.entityCacheWarmed = false
     await this.client.connect()
+    if (!this.entityCacheWarmed) {
+      this.entityCacheWarmed = true
+      // Dopo un reload la StringSession non porta con sé la entity cache: senza un
+      // getDialogs iniziale, getInputEntity fallisce con CHANNEL_INVALID sui megagruppi.
+      await this.client.getDialogs({ limit: 100 })
+    }
     return this.client
   }
 
@@ -81,7 +91,25 @@ class TelegramService {
   async fetchNewMessages(groupId: string, minId: number): Promise<Message[]> {
     try {
       const client = await this.getClient()
-      const raw = await client.getMessages(groupId, { minId, limit: 500, reverse: true })
+      let raw: Awaited<ReturnType<TelegramClient['getMessages']>>
+      if (minId === 0) {
+        // Primo sync: prendi i messaggi più recenti (ordine naturale newest-first), non i più vecchi della storia.
+        const recent = await client.getMessages(groupId, { limit: 500 })
+        raw = [...recent].sort((a, b) => a.id - b.id) as typeof recent
+      } else {
+        // Backfill: continua a paginare finché ci sono batch pieni, fino a un tetto massimo,
+        // per non perdere per sempre i messaggi oltre i primi 500 in sospeso.
+        const collected: Awaited<ReturnType<TelegramClient['getMessages']>>[number][] = []
+        let cursor = minId
+        for (;;) {
+          const batch = await client.getMessages(groupId, { minId: cursor, limit: 500, reverse: true })
+          if (batch.length === 0) break
+          collected.push(...batch)
+          cursor = Math.max(...batch.map((m) => m.id))
+          if (batch.length < 500 || collected.length >= BACKFILL_HARD_CAP) break
+        }
+        raw = collected as typeof raw
+      }
       return raw
         .filter((m) => m.message || m.media)
         .map((m) => ({
