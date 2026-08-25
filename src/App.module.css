@@ -1,3 +1,11 @@
 .app {
   padding: var(--space-4);
 }
+
+.splash {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: var(--font-mono);
+}
