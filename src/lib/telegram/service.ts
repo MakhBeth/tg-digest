@@ -24,11 +24,12 @@ class TelegramService {
     })
     this.entityCacheWarmed = false
     await this.client.connect()
-    if (!this.entityCacheWarmed) {
-      this.entityCacheWarmed = true
-      // Dopo un reload la StringSession non porta con sé la entity cache: senza un
-      // getDialogs iniziale, getInputEntity fallisce con CHANNEL_INVALID sui megagruppi.
+    // Dopo un reload la StringSession non porta con sé la entity cache: senza un
+    // getDialogs iniziale, getInputEntity fallisce con CHANNEL_INVALID sui megagruppi.
+    // Solo da autorizzati: durante il login GetDialogs risponde 401 AUTH_KEY_UNREGISTERED.
+    if (!this.entityCacheWarmed && (await this.client.isUserAuthorized())) {
       await this.client.getDialogs({ limit: 100 })
+      this.entityCacheWarmed = true
     }
     return this.client
   }

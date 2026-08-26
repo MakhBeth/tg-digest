@@ -25,6 +25,15 @@ describe('chatCompletion', () => {
     expect(call[0]).toBe('https://api.anthropic.com/v1/messages')
     expect(call[1].headers['anthropic-dangerous-direct-browser-access']).toBe('true')
   })
+  it('claude-code: usa il bridge locale e ritorna il testo', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+      choices: [{ message: { content: 'risposta bridge' } }],
+    })))
+    vi.stubGlobal('fetch', fetchMock)
+    const out = await chatCompletion({ ...DEFAULT_SETTINGS, provider: 'claude-code', claudeBridgeUrl: 'http://localhost:11435' }, 'sys', 'user')
+    expect(out).toBe('risposta bridge')
+    expect((fetchMock.mock.calls[0] as unknown as [string])[0]).toBe('http://localhost:11435/v1/chat/completions')
+  })
   it('errore HTTP: lancia con status e corpo', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('boom', { status: 500 })))
     await expect(chatCompletion(DEFAULT_SETTINGS, 's', 'u')).rejects.toThrow(/500/)

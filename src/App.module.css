@@ -9,3 +9,26 @@
   min-height: 100vh;
   font-family: var(--font-mono);
 }
+
+.splashLogo {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--on-accent);
+  letter-spacing: -1px;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  padding: 6px 20px;
+}
+
+.splashLogo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  transform: skewX(-25deg);
+  border-radius: 8px;
+  box-shadow: 0 0 24px var(--glow);
+}

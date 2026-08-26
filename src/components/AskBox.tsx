@@ -38,7 +38,7 @@ export function AskBox() {
   }
 
   return (
-    <div className={styles.box} {...(busy ? { inert: true } : {})}>
+    <div className={styles.box} {...(busy ? { inert: '' } : {})}>
       <textarea
         className={styles.textarea}
         value={question}
@@ -54,7 +54,7 @@ export function AskBox() {
         <select value={periodMs} onChange={e => setPeriodMs(Number(e.target.value))}>
           {PERIODS.map(p => <option key={p.ms} value={p.ms}>{p.label}</option>)}
         </select>
-        <button onClick={submit}>{busy ? 'Sto pensando...' : 'Chiedi'}</button>
+        <button className={styles.submit} onClick={submit}>{busy ? 'Sto pensando...' : 'Chiedi'}</button>
       </div>
       {error && <p className={styles.error}>{error}</p>}
     </div>

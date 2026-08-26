@@ -6,9 +6,10 @@ import { chatCompletion, CONTEXT_CHAR_BUDGET } from '../llm/client'
 import { selectMessagesForPeriod } from './selectMessages'
 import type { Summary } from '../../types/models'
 
-export async function runOpenDigest(now: number): Promise<void> {
+export async function runOpenDigest(now: number): Promise<number> {
   const settings = await getSettings()
   const groups = await db.groups.filter(g => g.followed).toArray()
+  let generated = 0
   for (const g of groups) {
     const from = g.lastDigestAt || now - 7 * 86_400_000
     const msgs = await selectMessagesForPeriod([g.id], from, now)
@@ -33,7 +34,9 @@ export async function runOpenDigest(now: number): Promise<void> {
       })
       // lastDigestAt NON si aggiorna: al prossimo giro si riprova sullo stesso periodo
     }
+    generated++
   }
+  return generated
 }
 
 export async function askQuestion(args: { groupIds: string[]; from: number; to: number; question: string }): Promise<Summary> {

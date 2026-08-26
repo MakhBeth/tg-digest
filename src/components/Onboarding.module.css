@@ -1,22 +1,54 @@
 .wrapper {
   max-width: 420px;
   margin: 0 auto;
-  padding: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .title {
   font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--on-accent);
+  letter-spacing: -1px;
   margin-bottom: var(--space-4);
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  padding: 6px 20px;
+}
+
+.title::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  transform: skewX(-25deg);
+  border-radius: 8px;
+  box-shadow: 0 0 24px var(--glow);
 }
 
 .form {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  background: var(--surface);
+  background:
+    radial-gradient(420px 220px at 88% -8%, rgb(from var(--accent-secondary) r g b / 0.12), transparent 60%),
+    linear-gradient(150deg, var(--bg-card-elevated) 0%, var(--bg-card) 55%, #060a10 100%);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 24px;
+  corner-shape: squircle;
   padding: var(--space-4);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.form h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
 }
 
 .form[inert] {
@@ -24,19 +56,24 @@
 }
 
 .help {
-  color: var(--text-dim);
+  color: var(--text-muted);
   font-size: 0.9em;
   line-height: 1.4;
 }
 
 .help a {
-  color: var(--accent);
+  color: var(--accent-secondary);
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+}
+
+.field span {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
 
 .error {
@@ -49,7 +86,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid var(--border);
-  border-top-color: var(--accent);
+  border-top-color: var(--accent-secondary);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   align-self: center;
@@ -59,4 +96,27 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.submit {
+  padding: 10px 22px;
+  border-radius: 999px;
+  corner-shape: squircle;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: var(--on-accent);
+  box-shadow: 0 0 20px var(--glow);
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+  align-self: flex-start;
+}
+
+.submit:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 0 28px var(--glow);
+}
+
+.submit:active {
+  transform: scale(0.97);
 }

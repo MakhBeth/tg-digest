@@ -5,6 +5,8 @@ import 'react'
 
 declare module 'react' {
   interface HTMLAttributes<T> {
-    inert?: boolean
+    // React 18 tratta inert come attributo custom non-boolean: si passa '' per
+    // attivarlo (true genera il warning "non-boolean attribute").
+    inert?: boolean | ''
   }
 }

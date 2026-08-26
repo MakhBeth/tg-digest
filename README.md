@@ -22,6 +22,8 @@ npm i
 npm run dev
 ```
 
+`npm run dev` avvia anche il bridge Claude Code insieme a vite (se la porta 11435 è già occupata lo riusa senza fallire); il bridge da solo resta `node bridge/claude-bridge.mjs`.
+
 Al primo avvio l'app guida l'onboarding: inserisci `api_id`/`api_hash`, il numero di telefono, il codice ricevuto via Telegram (ed eventuale password 2FA), poi scegli i gruppi da seguire.
 
 ## Nota CORS per Ollama
@@ -33,6 +35,18 @@ OLLAMA_ORIGINS=* ollama serve
 ```
 
 Senza questa variabile le richieste falliscono con un errore di rete e l'app mostra un banner dedicato con l'istruzione sopra.
+
+## Provider Claude Code (abbonamento)
+
+Oltre a Ollama e alla API key Anthropic, puoi usare l'abbonamento Claude Code tramite la CLI `claude` installata sulla tua macchina, senza configurare una chiave API separata. Serve un piccolo bridge locale che espone la CLI con un'interfaccia compatibile OpenAI, richiamata dal browser.
+
+Avvia il bridge con:
+
+```
+node bridge/claude-bridge.mjs
+```
+
+Il bridge resta in ascolto su `http://localhost:11435` (porta configurabile con la variabile `PORT`) e usa `claude -p --output-format text` per generare le risposte. Nelle Impostazioni dell'app seleziona il provider "Claude Code (abbonamento)" e verifica l'URL del bridge.
 
 ## Privacy
 

@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext'
 import { telegramService } from '../lib/telegram/service'
 import { getSettings, setSetting, DEFAULT_SETTINGS } from '../lib/db/settings'
 import type { AppSettings, LlmProvider } from '../types/models'
+import { GroupPicker } from './GroupPicker'
 import styles from './Settings.module.css'
 
 export function Settings() {
@@ -49,17 +50,20 @@ export function Settings() {
           >
             <option value="ollama">Ollama</option>
             <option value="anthropic">Anthropic</option>
+            <option value="claude-code">Claude Code (abbonamento)</option>
           </select>
         </label>
 
-        <label className={styles.field}>
-          <span>Modello</span>
-          <input
-            type="text"
-            value={settings.model}
-            onChange={e => update('model', e.target.value)}
-          />
-        </label>
+        {settings.provider !== 'claude-code' && (
+          <label className={styles.field}>
+            <span>Modello</span>
+            <input
+              type="text"
+              value={settings.model}
+              onChange={e => update('model', e.target.value)}
+            />
+          </label>
+        )}
 
         {settings.provider === 'anthropic' && (
           <label className={styles.field}>
@@ -81,6 +85,31 @@ export function Settings() {
               onChange={e => update('ollamaUrl', e.target.value)}
             />
             <span className={styles.hint}>Avvia Ollama con OLLAMA_ORIGINS=* ollama serve</span>
+          </label>
+        )}
+
+        {settings.provider === 'claude-code' && (
+          <label className={styles.field}>
+            <span>URL bridge Claude Code</span>
+            <input
+              type="text"
+              value={settings.claudeBridgeUrl}
+              onChange={e => update('claudeBridgeUrl', e.target.value)}
+            />
+            <span className={styles.hint}>Avvia il bridge con: node bridge/claude-bridge.mjs</span>
+          </label>
+        )}
+
+        {settings.provider === 'claude-code' && (
+          <label className={styles.field}>
+            <span>Modello Claude</span>
+            <input
+              type="text"
+              value={settings.claudeModel}
+              onChange={e => update('claudeModel', e.target.value)}
+              placeholder="vuoto = default del CLI"
+            />
+            <span className={styles.hint}>Es. sonnet, opus, haiku. Vuoto usa il modello configurato in Claude Code.</span>
           </label>
         )}
 
@@ -108,14 +137,20 @@ export function Settings() {
           />
         </label>
 
-        <button type="button" onClick={() => setView('home')}>
+        <button type="button" className={styles.btn} onClick={() => setView('home')}>
           Torna alla home
         </button>
       </div>
 
-      <div className={styles.form} {...(busy ? { inert: true } : {})}>
+      <div className={styles.form}>
+        <h2>Gruppi</h2>
+        <span className={styles.hint}>Spunta i gruppi da seguire nei digest.</span>
+        <GroupPicker />
+      </div>
+
+      <div className={styles.form} {...(busy ? { inert: '' } : {})}>
         <h2>Account</h2>
-        <button type="button" onClick={logout}>
+        <button type="button" className={styles.logoutBtn} onClick={logout}>
           {busy ? 'Disconnessione...' : 'Logout'}
         </button>
       </div>

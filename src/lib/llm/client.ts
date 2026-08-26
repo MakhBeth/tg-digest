@@ -21,6 +21,19 @@ export async function chatCompletion(settings: AppSettings, system: string, user
     const data = await res.json()
     return data.content.filter((b: { type: string }) => b.type === 'text').map((b: { text: string }) => b.text).join('')
   }
+  if (settings.provider === 'claude-code') {
+    const res = await fetch(`${settings.claudeBridgeUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        model: settings.claudeModel,
+        messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+      }),
+    })
+    if (!res.ok) throw new Error(`Claude Code bridge ${res.status}: ${await res.text()}`)
+    const data = await res.json()
+    return data.choices[0].message.content
+  }
   const res = await fetch(`${settings.ollamaUrl}/v1/chat/completions`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

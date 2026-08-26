@@ -10,10 +10,21 @@
 }
 
 .list li {
-  background: var(--surface-2);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 12px;
+  corner-shape: squircle;
   padding: var(--space-2) var(--space-3);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.list li:hover {
+  background: var(--bg-hover);
+}
+
+.list li:has(input:checked) {
+  border-color: var(--border-strong);
+  background: rgb(from var(--accent-secondary) r g b / 0.08);
 }
 
 .list label {
@@ -21,6 +32,7 @@
   align-items: center;
   gap: var(--space-2);
   cursor: pointer;
+  color: var(--text-primary);
 }
 
 .error {

@@ -98,12 +98,12 @@ export function Onboarding() {
             />
           </label>
           {error && <p className={styles.error}>{error}</p>}
-          <button type="submit">Continua</button>
+          <button type="submit" className={styles.submit}>Continua</button>
         </form>
       )}
 
       {step === 'phone' && (
-        <form className={styles.form} onSubmit={handlePhone} {...(busy ? { inert: true } : {})}>
+        <form className={styles.form} onSubmit={handlePhone} {...(busy ? { inert: '' } : {})}>
           <h2>Numero di telefono</h2>
           <label className={styles.field}>
             <span>Telefono</span>
@@ -115,13 +115,13 @@ export function Onboarding() {
             />
           </label>
           {error && <p className={styles.error}>{error}</p>}
-          <button type="submit">{busy ? 'Invio in corso...' : 'Invia codice'}</button>
+          <button type="submit" className={styles.submit}>{busy ? 'Invio in corso...' : 'Invia codice'}</button>
           {busy && <span className={styles.spinner} aria-label="Caricamento" />}
         </form>
       )}
 
       {step === 'code' && (
-        <form className={styles.form} onSubmit={handleCode} {...(busy ? { inert: true } : {})}>
+        <form className={styles.form} onSubmit={handleCode} {...(busy ? { inert: '' } : {})}>
           <h2>Codice di accesso</h2>
           <label className={styles.field}>
             <span>Codice</span>
@@ -141,7 +141,7 @@ export function Onboarding() {
             />
           </label>
           {error && <p className={styles.error}>{error}</p>}
-          <button type="submit">{busy ? 'Verifica in corso...' : 'Conferma'}</button>
+          <button type="submit" className={styles.submit}>{busy ? 'Verifica in corso...' : 'Conferma'}</button>
           {busy && <span className={styles.spinner} aria-label="Caricamento" />}
         </form>
       )}
@@ -150,7 +150,7 @@ export function Onboarding() {
         <div className={styles.form}>
           <h2>Scegli i gruppi da seguire</h2>
           <GroupPicker />
-          <button type="button" onClick={() => setView('home')}>
+          <button type="button" className={styles.submit} onClick={() => setView('home')}>
             Fatto
           </button>
         </div>

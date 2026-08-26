@@ -1,11 +1,26 @@
 .card {
-  background: var(--surface);
+  background:
+    radial-gradient(420px 220px at 88% -8%, rgb(from var(--accent-secondary) r g b / 0.12), transparent 60%),
+    radial-gradient(300px 180px at 0% 0%, rgba(255, 255, 255, 0.04), transparent 55%),
+    linear-gradient(150deg, var(--bg-card-elevated) 0%, var(--bg-card) 55%, #060a10 100%);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-3);
+  border-radius: 24px;
+  corner-shape: squircle;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+}
+
+.card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md), 0 0 24px var(--glow);
 }
 
 .header {
@@ -16,32 +31,67 @@
 }
 
 .badge {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-1) var(--space-2);
+  padding: 5px 14px;
+  border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 0.8em;
-  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: 1px solid var(--border-strong);
+  background: rgb(from var(--accent-secondary) r g b / 0.08);
+  color: var(--accent-secondary);
+}
+
+.badge[data-type='question'] {
+  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(167, 139, 250, 0.08);
+  color: #a78bfa;
 }
 
 .group {
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .period {
-  color: var(--text-dim);
+  color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 0.85em;
   margin-left: auto;
 }
 
+.deleteBtn {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.deleteBtn:hover {
+  color: var(--danger);
+  background: rgb(from var(--danger) r g b / 0.1);
+  border-color: rgb(from var(--danger) r g b / 0.35);
+}
+
 .question {
   margin: 0;
+  color: var(--text-primary);
 }
 
 .text {
-  line-height: 1.5;
+  line-height: 1.6;
+  color: var(--text-secondary);
 }
 
 .text :global(p:first-child) {
@@ -52,11 +102,15 @@
   margin-bottom: 0;
 }
 
+.text :global(a) {
+  color: var(--accent-secondary);
+}
+
 .footer {
   display: flex;
   justify-content: space-between;
   gap: var(--space-2);
-  color: var(--text-dim);
+  color: var(--text-muted);
   font-size: 0.8em;
   font-family: var(--font-mono);
   border-top: 1px solid var(--border);

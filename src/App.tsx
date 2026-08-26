@@ -10,7 +10,7 @@ function AppShell() {
   if (!authChecked) {
     return (
       <div className={styles.splash}>
-        <h1>tg-digest</h1>
+        <h1 className={styles.splashLogo}>tg-digest</h1>
       </div>
     )
   }
