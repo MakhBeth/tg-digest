@@ -59,9 +59,18 @@ export function Settings() {
             <span>Modello</span>
             <input
               type="text"
+              list={settings.provider === 'ollama' ? 'ollama-models' : undefined}
               value={settings.model}
               onChange={e => update('model', e.target.value)}
             />
+            {settings.provider === 'ollama' && (
+              <datalist id="ollama-models">
+                <option value="qwen3.6:35b-mlx" />
+                <option value="gemma4:26b-mlx" />
+                <option value="gpt-oss:120b-cloud" />
+                <option value="gpt-oss:20b-cloud" />
+              </datalist>
+            )}
           </label>
         )}
 
