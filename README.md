@@ -2,9 +2,9 @@
 
 I follow a lot of Telegram groups, and most days I don't have the time to read them all. So I built this little thing.
 
-tg-digest connects to your Telegram account straight from the browser, pulls the new messages from the groups you pick, and asks an LLM to summarize them (main threads, decisions, shared links), with an optional section for the stuff that matters to *you*. You can also ask free-form questions over the collected messages.
+tg-digest logs into Telegram through the official Telegram API (MTProto, via [GramJS](https://github.com/gram-js/gramjs)) using your own `api_id`/`api_hash`, fetches the new messages from the groups you pick, and asks an LLM to summarize them (main threads, decisions, shared links), with an optional section for the stuff that matters to *you*. You can also ask free-form questions over the collected messages.
 
-Everything runs in the browser as a PWA: no backend, no server of mine, nothing leaves your machine except the calls to the LLM provider you choose.
+It is a plain web app (PWA): the Telegram client runs inside the page, there is no backend, no server of mine and no browser automation. Nothing leaves your machine except the API calls to Telegram and to the LLM provider you choose.
 
 > The UI is in Italian for now.
 
