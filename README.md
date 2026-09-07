@@ -12,7 +12,7 @@ tg-digest si collega al tuo account Telegram (via GramJS, direttamente dal brows
 - Un account Telegram.
 - Credenziali API Telegram: `api_id` e `api_hash`, da creare su [my.telegram.org/apps](https://my.telegram.org/apps).
 - Un provider LLM, a scelta:
-  - Ollama installato in locale, con un modello scaricato (es. `gemma3`), oppure
+  - Ollama installato in locale, con un modello scaricato (es. `qwen3.6:35b-mlx`), oppure
   - una API key Anthropic.
 
 ## Avvio

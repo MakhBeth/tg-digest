@@ -3,12 +3,17 @@ import type { AppSettings } from '../../types/models'
 
 export type SettingKey = keyof AppSettings
 
+// Se l'app e' servita da un host diverso da localhost (es. https://tg-digest.home via Caddy)
+// Ollama e bridge sono raggiungibili sotto /ollama e /bridge dello stesso origin, cosi' niente CORS.
+const origin = typeof window !== 'undefined' ? window.location.origin : ''
+const proxied = origin !== '' && !/^https?:\/\/(localhost|127\.0\.0\.1)(:|$)/.test(origin)
+
 export const DEFAULT_SETTINGS: AppSettings = {
   provider: 'ollama',
-  model: 'gemma3',
+  model: 'qwen3.6:35b-mlx',
   anthropicKey: '',
-  ollamaUrl: 'http://localhost:11434',
-  claudeBridgeUrl: 'http://localhost:11435',
+  ollamaUrl: proxied ? `${origin}/ollama` : 'http://localhost:11434',
+  claudeBridgeUrl: proxied ? `${origin}/bridge` : 'http://localhost:11435',
   claudeModel: '',
   profile: '',
   retentionDays: 30,

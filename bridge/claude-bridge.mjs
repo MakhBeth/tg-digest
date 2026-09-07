@@ -3,9 +3,30 @@
 // di una chiave API Anthropic separata. Nessuna dipendenza esterna.
 import { createServer } from 'node:http'
 import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { homedir } from 'node:os'
+import path from 'node:path'
+import { delimiter } from 'node:path'
 
 const PORT = Number(process.env.PORT) || 11435
 const TIMEOUT_MS = 5 * 60 * 1000
+
+// Trova il binario "claude": CLAUDE_BIN, poi PATH, poi le posizioni di installazione
+// note (il PATH del processo che avvia il bridge spesso non include ~/.local/bin).
+function findClaudeBin() {
+  if (process.env.CLAUDE_BIN) return process.env.CLAUDE_BIN
+  const home = homedir()
+  const candidates = [
+    ...(process.env.PATH ?? '').split(delimiter).filter(Boolean).map(dir => path.join(dir, 'claude')),
+    path.join(home, '.local', 'bin', 'claude'),
+    path.join(home, '.claude', 'local', 'claude'),
+    '/opt/homebrew/bin/claude',
+    '/usr/local/bin/claude',
+  ]
+  return candidates.find(c => existsSync(c)) ?? 'claude'
+}
+const CLAUDE_BIN = findClaudeBin()
+console.log(`Uso il binario claude: ${CLAUDE_BIN}`)
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -46,7 +67,7 @@ function runClaude(system, user, model) {
 
     let child
     try {
-      child = spawn('claude', args, { stdio: ['pipe', 'pipe', 'pipe'] })
+      child = spawn(CLAUDE_BIN, args, { stdio: ['pipe', 'pipe', 'pipe'] })
     } catch (err) {
       reject(new Error(`comando 'claude' non trovato nel PATH: ${err.message}`))
       return
@@ -68,7 +89,7 @@ function runClaude(system, user, model) {
       settled = true
       clearTimeout(timer)
       if (err.code === 'ENOENT') {
-        reject(new Error("comando 'claude' non trovato nel PATH"))
+        reject(new Error(`comando 'claude' non trovato (cercato: ${CLAUDE_BIN}); imposta CLAUDE_BIN`))
       } else {
         reject(err)
       }
