@@ -58,10 +58,29 @@ export function Settings() {
   if (!loaded) return null
 
   const CUSTOM = '__custom__'
-  const knownModel = (v: string) =>
-    ollamaModels.some(m => m.value === v) ||
-    lmstudioModels.some(m => m.value === v) ||
-    CLAUDE_CODE_MODELS.some(m => m.value === v)
+  // Il modello salvato conta come "noto" solo se appartiene alla lista del provider corrente:
+  // un modello avanzato dal provider precedente deve restare visibile come "(personalizzato)"
+  // invece di sparire dalla tendina restando salvato. La tendina Ollama include anche gli
+  // alias Claude per il trucco di puntare l'URL al bridge.
+  const knownModel = (provider: LlmProvider, v: string) =>
+    provider === 'lmstudio'
+      ? lmstudioModels.some(m => m.value === v)
+      : ollamaModels.some(m => m.value === v) || CLAUDE_CODE_MODELS.some(m => m.value === v)
+
+  // Al cambio provider il modello resta solo se e' gia' valido per il nuovo provider,
+  // altrimenti si riparte dal default di quel provider ('' per LM Studio: si sceglie
+  // dalla lista live del server).
+  const changeProvider = (next: LlmProvider) => {
+    setCustomModel(false)
+    update('provider', next)
+    if (next === settings.provider || knownModel(next, settings.model)) return
+    const fallback =
+      next === 'ollama' ? DEFAULT_SETTINGS.model
+      : next === 'lmstudio' ? ''
+      : next === 'anthropic' ? ANTHROPIC_MODELS[0].value
+      : undefined // claude-code usa claudeModel, il campo model non si tocca
+    if (fallback !== undefined) update('model', fallback)
+  }
 
   // Se il valore salvato non e' in lista (es. modello scritto a mano) lo mostriamo comunque
   const withCurrent = (options: ModelOption[], current: string): ModelOption[] =>
@@ -76,10 +95,7 @@ export function Settings() {
           <span>Provider</span>
           <select
             value={settings.provider}
-            onChange={e => {
-              setCustomModel(false)
-              update('provider', e.target.value as LlmProvider)
-            }}
+            onChange={e => changeProvider(e.target.value as LlmProvider)}
           >
             <option value="ollama">Ollama</option>
             <option value="lmstudio">LM Studio</option>
@@ -105,7 +121,7 @@ export function Settings() {
               <optgroup label="Claude (URL = bridge Claude Code)">
                 {CLAUDE_CODE_MODELS.filter(m => m.value).map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
               </optgroup>
-              {!customModel && !knownModel(settings.model) && (
+              {!customModel && !knownModel('ollama', settings.model) && (
                 <option value={settings.model}>{settings.model} (personalizzato)</option>
               )}
               <option value={CUSTOM}>Altro…</option>
@@ -133,8 +149,9 @@ export function Settings() {
                 update('model', e.target.value)
               }}
             >
+              {settings.model === '' && <option value="">— seleziona un modello —</option>}
               {lmstudioModels.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-              {!customModel && !knownModel(settings.model) && (
+              {!customModel && settings.model !== '' && !knownModel('lmstudio', settings.model) && (
                 <option value={settings.model}>{settings.model} (personalizzato)</option>
               )}
               <option value={CUSTOM}>Altro…</option>

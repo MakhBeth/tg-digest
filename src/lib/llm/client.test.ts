@@ -43,6 +43,14 @@ describe('chatCompletion', () => {
     expect(out).toBe('risposta lm studio')
     expect((fetchMock.mock.calls[0] as unknown as [string])[0]).toBe('http://localhost:1234/v1/chat/completions')
   })
+  it('lmstudio: modello vuoto rifiuta senza chiamare il server', async () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    await expect(
+      chatCompletion({ ...DEFAULT_SETTINGS, provider: 'lmstudio', lmstudioUrl: 'http://localhost:1234', model: '' }, 'sys', 'user'),
+    ).rejects.toThrow(/nessun modello/)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
   it('errore HTTP: lancia con status e corpo', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('boom', { status: 500 })))
     await expect(chatCompletion(DEFAULT_SETTINGS, 's', 'u')).rejects.toThrow(/500/)
