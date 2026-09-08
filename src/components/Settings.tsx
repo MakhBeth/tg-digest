@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext'
 import { telegramService } from '../lib/telegram/service'
 import { getSettings, setSetting, DEFAULT_SETTINGS } from '../lib/db/settings'
 import type { AppSettings, LlmProvider } from '../types/models'
-import { ANTHROPIC_MODELS, CLAUDE_CODE_MODELS, OLLAMA_MODELS, fetchOllamaModels, type ModelOption } from '../lib/llm/models'
+import { ANTHROPIC_MODELS, CLAUDE_CODE_MODELS, LMSTUDIO_MODELS, OLLAMA_MODELS, fetchLmStudioModels, fetchOllamaModels, type ModelOption } from '../lib/llm/models'
 import { GroupPicker } from './GroupPicker'
 import styles from './Settings.module.css'
 
@@ -14,16 +14,23 @@ export function Settings() {
   const [busy, setBusy] = useState(false)
   const [customModel, setCustomModel] = useState(false)
   const [ollamaModels, setOllamaModels] = useState<ModelOption[]>(OLLAMA_MODELS)
+  const [lmstudioModels, setLmstudioModels] = useState<ModelOption[]>(LMSTUDIO_MODELS)
 
-  // Lista live dei modelli Ollama; se l'URL non risponde resta il fallback statico
+  // Liste live dei modelli dai server locali; se l'URL non risponde resta il fallback statico
   useEffect(() => {
-    if (!loaded || settings.provider !== 'ollama') return
+    if (!loaded || (settings.provider !== 'ollama' && settings.provider !== 'lmstudio')) return
+    const isLmStudio = settings.provider === 'lmstudio'
     let cancelled = false
-    fetchOllamaModels(settings.ollamaUrl).then(list => {
-      if (!cancelled && list && list.length > 0) setOllamaModels(list)
+    const pending = isLmStudio
+      ? fetchLmStudioModels(settings.lmstudioUrl)
+      : fetchOllamaModels(settings.ollamaUrl)
+    pending.then(list => {
+      if (cancelled || !list || list.length === 0) return
+      if (isLmStudio) setLmstudioModels(list)
+      else setOllamaModels(list)
     })
     return () => { cancelled = true }
-  }, [loaded, settings.provider, settings.ollamaUrl])
+  }, [loaded, settings.provider, settings.ollamaUrl, settings.lmstudioUrl])
 
   useEffect(() => {
     getSettings().then(s => {
@@ -52,7 +59,9 @@ export function Settings() {
 
   const CUSTOM = '__custom__'
   const knownModel = (v: string) =>
-    ollamaModels.some(m => m.value === v) || CLAUDE_CODE_MODELS.some(m => m.value === v)
+    ollamaModels.some(m => m.value === v) ||
+    lmstudioModels.some(m => m.value === v) ||
+    CLAUDE_CODE_MODELS.some(m => m.value === v)
 
   // Se il valore salvato non e' in lista (es. modello scritto a mano) lo mostriamo comunque
   const withCurrent = (options: ModelOption[], current: string): ModelOption[] =>
@@ -67,9 +76,13 @@ export function Settings() {
           <span>Provider</span>
           <select
             value={settings.provider}
-            onChange={e => update('provider', e.target.value as LlmProvider)}
+            onChange={e => {
+              setCustomModel(false)
+              update('provider', e.target.value as LlmProvider)
+            }}
           >
             <option value="ollama">Ollama</option>
+            <option value="lmstudio">LM Studio</option>
             <option value="anthropic">Anthropic</option>
             <option value="claude-code">Claude Code (abbonamento)</option>
           </select>
@@ -92,6 +105,35 @@ export function Settings() {
               <optgroup label="Claude (URL = bridge Claude Code)">
                 {CLAUDE_CODE_MODELS.filter(m => m.value).map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
               </optgroup>
+              {!customModel && !knownModel(settings.model) && (
+                <option value={settings.model}>{settings.model} (personalizzato)</option>
+              )}
+              <option value={CUSTOM}>Altro…</option>
+            </select>
+            {customModel && (
+              <input
+                type="text"
+                autoFocus
+                value={settings.model}
+                onChange={e => update('model', e.target.value)}
+                placeholder="nome modello"
+              />
+            )}
+          </label>
+        )}
+
+        {settings.provider === 'lmstudio' && (
+          <label className={styles.field}>
+            <span>Modello</span>
+            <select
+              value={customModel ? CUSTOM : settings.model}
+              onChange={e => {
+                if (e.target.value === CUSTOM) { setCustomModel(true); return }
+                setCustomModel(false)
+                update('model', e.target.value)
+              }}
+            >
+              {lmstudioModels.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
               {!customModel && !knownModel(settings.model) && (
                 <option value={settings.model}>{settings.model} (personalizzato)</option>
               )}
@@ -143,6 +185,18 @@ export function Settings() {
               onChange={e => update('ollamaUrl', e.target.value)}
             />
             <span className={styles.hint}>Consigliato: {DEFAULT_SETTINGS.ollamaUrl}</span>
+          </label>
+        )}
+
+        {settings.provider === 'lmstudio' && (
+          <label className={styles.field}>
+            <span>URL LM Studio</span>
+            <input
+              type="text"
+              value={settings.lmstudioUrl}
+              onChange={e => update('lmstudioUrl', e.target.value)}
+            />
+            <span className={styles.hint}>Consigliato: {DEFAULT_SETTINGS.lmstudioUrl} (local server + CORS abilitato)</span>
           </label>
         )}
 

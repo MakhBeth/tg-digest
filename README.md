@@ -22,6 +22,7 @@ It is a plain web app (PWA): the Telegram client runs inside the page, there is 
 - A Telegram account, plus API credentials (`api_id` and `api_hash`) from [my.telegram.org/apps](https://my.telegram.org/apps).
 - An LLM provider, one of:
   - [Ollama](https://ollama.com) running locally with a model pulled (default: `qwen3.6:35b-mlx`, any model works);
+  - [LM Studio](https://lmstudio.ai) with its local server running (default port 1234) and CORS enabled in the server settings;
   - an Anthropic API key;
   - a Claude Code subscription, used through the `claude` CLI installed on your machine (see the bridge below).
 
@@ -48,10 +49,11 @@ The app walks you through it: enter `api_id` and `api_hash`, your phone number i
 
 | Field | What it does |
 |---|---|
-| **Provider** | `Ollama`, `Anthropic`, or `Claude Code (abbonamento)`. |
-| **Modello** | A select with the available models. With Ollama it lists what your server actually has (read live from `/api/tags`), plus the Claude aliases if you point the Ollama URL at the bridge. "Altro…" lets you type any name. |
+| **Provider** | `Ollama`, `LM Studio`, `Anthropic`, or `Claude Code (abbonamento)`. |
+| **Modello** | A select with the available models. With Ollama it lists what your server actually has (read live from `/api/tags`), with LM Studio from `/v1/models`, plus the Claude aliases if you point the Ollama URL at the bridge. "Altro…" lets you type any name. |
 | **API key Anthropic** | Only for the Anthropic provider. Stored locally. |
 | **URL Ollama** | Default `http://localhost:11434`. |
+| **URL LM Studio** | Default `http://localhost:1234` (the OpenAI-compatible endpoint of the LM Studio local server). |
 | **URL bridge Claude Code** | Default `http://localhost:11435`. |
 | **Modello Claude** | For the Claude Code provider: `Default della CLI` uses whatever your `claude` is configured with, or pick `opus` / `sonnet` / `haiku` / a full model ID. |
 | **Profilo** | A sentence about you (role, interests). The digest gets an extra section with the things relevant to that profile. |
@@ -68,6 +70,8 @@ OLLAMA_ORIGINS=* ollama serve
 
 Without it, requests fail with a network error and the app shows a banner with this instruction.
 
+With LM Studio the same applies: start the local server from the **Developer** tab (or `lms server start`) and turn on **Enable CORS** in the server settings.
+
 ### 4. Claude Code bridge
 
 `bridge/claude-bridge.mjs` is a tiny local HTTP server (no dependencies) that exposes the `claude` CLI through an OpenAI-compatible `/v1/chat/completions` endpoint, so the app can use your Claude Code subscription without a separate API key. It runs `claude -p --output-format text` for each request.
@@ -78,7 +82,7 @@ Without it, requests fail with a network error and the app shows a banner with t
 
 ### Serving it behind a reverse proxy
 
-If you serve `dist/` from a custom host (for example with Caddy), proxy Ollama under `/ollama` and the bridge under `/bridge` on the same origin. The app detects a non-localhost origin and defaults the two URLs to `<origin>/ollama` and `<origin>/bridge`, which avoids CORS entirely.
+If you serve `dist/` from a custom host (for example with Caddy), proxy Ollama under `/ollama`, LM Studio under `/lmstudio` and the bridge under `/bridge` on the same origin. The app detects a non-localhost origin and defaults the URLs to `<origin>/ollama`, `<origin>/lmstudio` and `<origin>/bridge`, which avoids CORS entirely.
 
 ```
 tg-digest.home {
@@ -91,6 +95,9 @@ tg-digest.home {
 			header_up Origin http://127.0.0.1
 			header_up Host 127.0.0.1:11434
 		}
+	}
+	handle_path /lmstudio/* {
+		reverse_proxy 127.0.0.1:1234
 	}
 	root * /path/to/tg-digest/dist
 	file_server

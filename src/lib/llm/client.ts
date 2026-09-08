@@ -34,6 +34,19 @@ export async function chatCompletion(settings: AppSettings, system: string, user
     const data = await res.json()
     return data.choices[0].message.content
   }
+  if (settings.provider === 'lmstudio') {
+    const res = await fetch(`${settings.lmstudioUrl.replace(/\/$/, '').replace(/\/v1$/, '')}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        model: settings.model,
+        messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+      }),
+    })
+    if (!res.ok) throw new Error(`LM Studio ${res.status}: ${await res.text()}`)
+    const data = await res.json()
+    return data.choices[0].message.content
+  }
   const res = await fetch(`${settings.ollamaUrl}/v1/chat/completions`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

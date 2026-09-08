@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   model: 'qwen3.6:35b-mlx',
   anthropicKey: '',
   ollamaUrl: proxied ? `${origin}/ollama` : 'http://localhost:11434',
+  lmstudioUrl: proxied ? `${origin}/lmstudio` : 'http://localhost:1234',
   claudeBridgeUrl: proxied ? `${origin}/bridge` : 'http://localhost:11435',
   claudeModel: '',
   profile: '',
@@ -32,10 +33,14 @@ export async function getSettings(): Promise<AppSettings> {
   const map = new Map(rows.map(r => [r.key, r.value]))
   const provider = map.get('provider')
   return {
-    provider: provider === 'anthropic' || provider === 'claude-code' ? provider : DEFAULT_SETTINGS.provider,
+    provider:
+      provider === 'lmstudio' || provider === 'anthropic' || provider === 'claude-code'
+        ? provider
+        : DEFAULT_SETTINGS.provider,
     model: map.get('model') ?? DEFAULT_SETTINGS.model,
     anthropicKey: map.get('anthropicKey') ?? DEFAULT_SETTINGS.anthropicKey,
     ollamaUrl: map.get('ollamaUrl') ?? DEFAULT_SETTINGS.ollamaUrl,
+    lmstudioUrl: map.get('lmstudioUrl') ?? DEFAULT_SETTINGS.lmstudioUrl,
     claudeBridgeUrl: map.get('claudeBridgeUrl') ?? DEFAULT_SETTINGS.claudeBridgeUrl,
     claudeModel: map.get('claudeModel') ?? DEFAULT_SETTINGS.claudeModel,
     profile: map.get('profile') ?? DEFAULT_SETTINGS.profile,
