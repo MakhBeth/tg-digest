@@ -16,6 +16,8 @@ export function Home() {
   const groups = useLiveQuery(() => db.groups.toArray(), [], [])
   const titleOf = (id: string | null) => id === null ? 'Tutti i gruppi' : groups?.find(g => g.id === id)?.title ?? id
   const isOllamaUnreachable = provider === 'ollama' && /fetch/i.test(error)
+  const isLmStudioUnreachable = provider === 'lmstudio' && /fetch/i.test(error)
+  const isLocalUnreachable = isOllamaUnreachable || isLmStudioUnreachable
   const isRunning = phase === 'syncing' || phase === 'digesting'
 
   const deleteAll = () => {
@@ -56,7 +58,12 @@ export function Home() {
           Ollama non raggiungibile. Avvialo con: <code className={styles.code}>{OLLAMA_UNREACHABLE_CMD}</code>
         </p>
       )}
-      {phase === 'error' && !isOllamaUnreachable && <p className={styles.error}>{error}</p>}
+      {phase === 'error' && isLmStudioUnreachable && (
+        <p className={styles.error}>
+          LM Studio non raggiungibile. Avvia il local server (Developer &rarr; Start Server) e abilita CORS.
+        </p>
+      )}
+      {phase === 'error' && !isLocalUnreachable && <p className={styles.error}>{error}</p>}
       {phase === 'done' && doneMessage && <p className={styles.status}>{doneMessage}</p>}
       {syncWarning && <p className={styles.syncWarning}>{syncWarning}</p>}
       <AskBox />

@@ -34,6 +34,15 @@ describe('chatCompletion', () => {
     expect(out).toBe('risposta bridge')
     expect((fetchMock.mock.calls[0] as unknown as [string])[0]).toBe('http://localhost:11435/v1/chat/completions')
   })
+  it('lmstudio: usa /v1/chat/completions e tollera un URL con /v1', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+      choices: [{ message: { content: 'risposta lm studio' } }],
+    })))
+    vi.stubGlobal('fetch', fetchMock)
+    const out = await chatCompletion({ ...DEFAULT_SETTINGS, provider: 'lmstudio', lmstudioUrl: 'http://localhost:1234/v1' }, 'sys', 'user')
+    expect(out).toBe('risposta lm studio')
+    expect((fetchMock.mock.calls[0] as unknown as [string])[0]).toBe('http://localhost:1234/v1/chat/completions')
+  })
   it('errore HTTP: lancia con status e corpo', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('boom', { status: 500 })))
     await expect(chatCompletion(DEFAULT_SETTINGS, 's', 'u')).rejects.toThrow(/500/)

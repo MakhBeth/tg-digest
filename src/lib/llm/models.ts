@@ -59,3 +59,41 @@ export async function fetchOllamaModels(baseUrl: string): Promise<ModelOption[] 
     return null
   }
 }
+
+// Nessun fallback statico: gli id dei modelli LM Studio dipendono da cosa ha scaricato l'utente
+export const LMSTUDIO_MODELS: ModelOption[] = []
+
+// Legge i modelli dal server LM Studio. Usa l'endpoint nativo /api/v0/models che elenca
+// tutti i modelli scaricati (non solo quelli caricati) e permette di escludere gli embedding;
+// se assente (LM Studio vecchio) ricade su /v1/models. Ritorna null se non raggiungibile.
+export async function fetchLmStudioModels(baseUrl: string): Promise<ModelOption[] | null> {
+  const root = baseUrl.replace(/\/$/, '').replace(/\/v1$/, '')
+  try {
+    const res = await fetch(`${root}/api/v0/models`)
+    if (res.ok) {
+      const data = await res.json() as { data?: { id: string; type?: string }[] }
+      if (Array.isArray(data.data)) {
+        return data.data
+          .filter(m => m.type !== 'embeddings')
+          .map(m => ({ value: m.id, label: m.id }))
+      }
+      return null
+    }
+    if (res.status === 404) return fetchLmStudioModelsOpenAi(root)
+    return null
+  } catch {
+    return null
+  }
+}
+
+async function fetchLmStudioModelsOpenAi(root: string): Promise<ModelOption[] | null> {
+  try {
+    const res = await fetch(`${root}/v1/models`)
+    if (!res.ok) return null
+    const data = await res.json() as { data?: { id: string }[] }
+    if (!Array.isArray(data.data)) return null
+    return data.data.map(m => ({ value: m.id, label: m.id }))
+  } catch {
+    return null
+  }
+}

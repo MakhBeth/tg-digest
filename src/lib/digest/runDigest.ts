@@ -24,10 +24,12 @@ export async function runOpenDigest(now: number): Promise<number> {
       })
       await db.groups.update(g.id, { lastDigestAt: now })
     } catch (e) {
-      const isOllamaUnreachable = settings.provider === 'ollama' && /fetch/i.test(String(e))
-      const text = isOllamaUnreachable
+      const unreachable = /fetch/i.test(String(e))
+      const text = unreachable && settings.provider === 'ollama'
         ? `**Errore digest**: Ollama non raggiungibile. Avvialo con: OLLAMA_ORIGINS=* ollama serve\n${String(e)}`
-        : `**Errore digest**: ${String(e)}`
+        : unreachable && settings.provider === 'lmstudio'
+          ? `**Errore digest**: LM Studio non raggiungibile. Avvia il local server (Developer -> Start Server) e abilita CORS\n${String(e)}`
+          : `**Errore digest**: ${String(e)}`
       await db.summaries.add({
         groupId: g.id, type: 'digest', periodFrom: from, periodTo: now,
         text, model: `${settings.provider}/${settings.model}`, createdAt: now,

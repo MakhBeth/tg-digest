@@ -1,4 +1,4 @@
-export type LlmProvider = 'ollama' | 'anthropic' | 'claude-code'
+export type LlmProvider = 'ollama' | 'lmstudio' | 'anthropic' | 'claude-code'
 
 export interface Group {
   id: string            // chat id Telegram come stringa
@@ -34,6 +34,7 @@ export interface AppSettings {
   model: string
   anthropicKey: string
   ollamaUrl: string
+  lmstudioUrl: string
   claudeBridgeUrl: string
   claudeModel: string
   profile: string
