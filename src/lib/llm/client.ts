@@ -35,6 +35,7 @@ export async function chatCompletion(settings: AppSettings, system: string, user
     return data.choices[0].message.content
   }
   if (settings.provider === 'lmstudio') {
+    if (!settings.model.trim()) throw new Error('LM Studio: nessun modello selezionato, scegline uno nelle impostazioni')
     const res = await fetch(`${settings.lmstudioUrl.replace(/\/$/, '').replace(/\/v1$/, '')}/v1/chat/completions`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

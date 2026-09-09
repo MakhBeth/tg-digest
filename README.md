@@ -50,7 +50,7 @@ The app walks you through it: enter `api_id` and `api_hash`, your phone number i
 | Field | What it does |
 |---|---|
 | **Provider** | `Ollama`, `LM Studio`, `Anthropic`, or `Claude Code (abbonamento)`. |
-| **Modello** | A select with the available models. With Ollama it lists what your server actually has (read live from `/api/tags`), with LM Studio from `/v1/models`, plus the Claude aliases if you point the Ollama URL at the bridge. "Altro…" lets you type any name. |
+| **Modello** | A select with the available models. With Ollama it lists what your server actually has (read live from `/api/tags`), with LM Studio from the native `/api/v0/models` endpoint (fallback `/v1/models`), plus the Claude aliases if you point the Ollama URL at the bridge. "Altro…" lets you type any name. Switching provider keeps the saved model only if it fits the new provider, otherwise it resets to that provider's default (with LM Studio you then pick from the live list). |
 | **API key Anthropic** | Only for the Anthropic provider. Stored locally. |
 | **URL Ollama** | Default `http://localhost:11434`. |
 | **URL LM Studio** | Default `http://localhost:1234` (the OpenAI-compatible endpoint of the LM Studio local server). |
