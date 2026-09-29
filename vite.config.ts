@@ -7,7 +7,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     react(),
-    nodePolyfills({ globals: { Buffer: true, process: true } }),
+    // Polyfill solo per il browser: i test girano in Node e usano i moduli veri (es. il bridge).
+    process.env.VITEST ? null : nodePolyfills({ globals: { Buffer: true, process: true } }),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {

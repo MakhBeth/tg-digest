@@ -76,13 +76,22 @@ With LM Studio the same applies: start the local server from the **Developer** t
 
 `bridge/claude-bridge.mjs` is a tiny local HTTP server (no dependencies) that exposes the `claude` CLI through an OpenAI-compatible `/v1/chat/completions` endpoint, so the app can use your Claude Code subscription without a separate API key. It runs `claude -p --output-format text` for each request.
 
-- Listens on `http://localhost:11435` (change with `PORT`).
+- Listens on `http://127.0.0.1:11435` only, never on the network (change the port with `PORT`).
+- Accepts requests only from the origins in `ALLOWED_ORIGINS` (exact origins, comma-separated; `*` is refused). The default is `http://localhost:5173,http://127.0.0.1:5173`, i.e. `npm run dev`. The `Origin` header is checked on every request, so other websites open in your browser cannot use your subscription.
+- Runs the CLI with no tools and no MCP servers (`--tools "" --strict-mcp-config`), without saving sessions (`--no-session-persistence`), in a temporary directory deleted after each request.
+- Handles one request at a time, caps the request body at 5 MiB, kills the CLI after 5 minutes or when the client disconnects, and redacts secrets from error messages.
 - Finds the `claude` binary via `CLAUDE_BIN`, then `PATH`, then the usual install locations (`~/.local/bin`, `~/.claude/local`, Homebrew).
 - Passes `--model` only when a model is selected; otherwise the CLI default is used.
 
+Serving the built app from another origin (`vite preview`, a custom host)? Add it explicitly:
+
+```
+ALLOWED_ORIGINS='http://localhost:5173,https://tg-digest.home' node bridge/claude-bridge.mjs
+```
+
 ### Serving it behind a reverse proxy
 
-If you serve `dist/` from a custom host (for example with Caddy), proxy Ollama under `/ollama`, LM Studio under `/lmstudio` and the bridge under `/bridge` on the same origin. The app detects a non-localhost origin and defaults the URLs to `<origin>/ollama`, `<origin>/lmstudio` and `<origin>/bridge`, which avoids CORS entirely.
+If you serve `dist/` from a custom host (for example with Caddy), proxy Ollama under `/ollama`, LM Studio under `/lmstudio` and the bridge under `/bridge` on the same origin. The app detects a non-localhost origin and defaults the URLs to `<origin>/ollama`, `<origin>/lmstudio` and `<origin>/bridge`, which avoids CORS entirely. The browser still sends the page's `Origin` to the bridge, so start the bridge with that origin in `ALLOWED_ORIGINS` (for the example below, `https://tg-digest.home`), otherwise it answers 403.
 
 ```
 tg-digest.home {
